@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>Babylon.js sample code</title>
+
+    <!-- Babylon.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+    <script src="https://preview.babylonjs.com/ammo.js"></script>
+    <script src="https://preview.babylonjs.com/cannon.js"></script>
+    <script src="https://preview.babylonjs.com/Oimo.js"></script>
+    <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+    <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+    <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+    <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+    <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+    <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var engine = new BABYLON.Engine(canvas, true);
+
+        var scene = null;
+        var sceneToRender = null;
+        var createDefaultEngine = function () { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, disableWebGL2Support: false }); };
+        engine.setHardwareScalingLevel(0.4);
+
+        const createScene = () => {
+            const scene = new BABYLON.Scene(engine);
+
+scene.clearColor = new BABYLON.Color3(0.3,0.3,0.3)
+
+            scene.debugLayer.show({ showExplorer: true });//传说中的inspector调试工具
+
+            var light = new BABYLON.PointLight("light", new BABYLON.Vector3(3, 20, 10), scene);
+            var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(3, 20, -10), scene);
+            BABYLON.SceneLoader.Append("", "xinyanBabylon.gltf", scene, function (scene) {
+                //Create a default arc rotate camera and light.
+                //scene.createDefaultCameraOrLight(true, false, false);
+                var Camera = new BABYLON.ArcRotateCamera("Camera", -10, 5, 10, new BABYLON.Vector3(-1.5, 8, -2), scene);
+
+                Camera.setPosition(new BABYLON.Vector3(0, 15, 20));
+                Camera.fov = 1
+                Camera.attachControl(canvas, true);
+                Camera.wheelPrecision = 20
+                Camera.minZ = 0.1
+
+                light.intensity = 2;//灯光强度
+                light.diffuse = new BABYLON.Color3(1,1,0.7)
+                light2.intensity = 2
+                light.shadowMinZ = 0.1
+                light.shadowMaxZ = 1200
+                light2.shadowMinZ = 0.1
+                light2.shadowMaxZ = 1200
+
+                
+
+                //Light.excludedMeshes = [cube];//排除自发光物体使其免受灯光影响
+
+                var xinyan = scene.getMeshByName("xinyan")
+                var xinyanLine = scene.getMeshByName("xinyanLine")
+                xinyanLine.material.indexOfRefraction = 0
+                xinyanLine.material.metallicF0Factor = 0
+
+                // var gizmoManager = new BABYLON.GizmoManager(scene)
+                //     gizmoManager.boundingBoxGizmoEnabled=true
+
+                // #8TPY1Y
+//#4AWEWY#74
+                BABYLON.NodeMaterial.ParseFromSnippetAsync("#4AWEWY#74", scene).then((node) => {
+                    xinyan.material = node;
+
+                });
+                
+
+
+
+
+
+
+xinyan.material = node;
+
+                var shadowGenerator = new BABYLON.ShadowGenerator(2048, light);
+                            shadowGenerator.getShadowMap().renderList.push(xinyan);
+                            shadowGenerator.setDarkness(0);
+                            shadowGenerator.filter = BABYLON.ShadowGenerator.FILTER_PCSS;//应该有模糊投影才对，但是没有
+                            shadowGenerator.usePoissonSampling = true;
+                            shadowGenerator.useContactHardeningShadow = true;
+                            shadowGenerator.usePercentageCloserFiltering = true;//应该有模糊投影才对，但是没有
+                            shadowGenerator.bias = 0.0001
+
+                            shadowGenerator.blurBoxOffset = 0.01
+
+
+                            var shadowGenerator2 = new BABYLON.ShadowGenerator(2048, light2);
+                            shadowGenerator2.getShadowMap().renderList.push(xinyan);
+                            shadowGenerator2.setDarkness(0);
+                            shadowGenerator2.filter = BABYLON.ShadowGenerator.FILTER_PCSS;//应该有模糊投影才对，但是没有
+                            shadowGenerator2.usePoissonSampling = true;
+                            shadowGenerator2.useContactHardeningShadow = true;
+                            shadowGenerator2.usePercentageCloserFiltering = true;//应该有模糊投影才对，但是没有
+                            shadowGenerator2.bias = 0.0001
+
+                            shadowGenerator2.blurBoxOffset = 0.01
+
+                            xinyan.receiveShadows = true;
+                //辉光层
+                // var gl = new BABYLON.GlowLayer("gl", scene, {
+
+                //     mainTextureFixedSize: 1024,//贴图大小
+                //     blurKernelSize: 64 //模糊大小
+
+
+                // })
+                // gl.intensity = 1.5
+
+                // //gl.addExcludedMesh(pep)
+
+                // var hl = new BABYLON.HighlightLayer("hl", scene, {mainTextureFixedSize:2048, blurHorizontalSize:30, blurVerticalSize: 30,isStroke:true,alphaBlendingMode:2});
+                // hl.addMesh(xinyan,new BABYLON.Color3(0.6,0.6,0.4));
+
+                // hl.innerGlow =false
+                // hl.renderingGroupId = 2
+
+
+            });
+
+
+
+
+            return scene;
+        }
+        window.initFunction = async function () {
+            var asyncEngineCreation = async function () {
+                try {
+                    return createDefaultEngine();
+                } catch (e) {
+                    console.log("the available createEngine function failed. Creating the default engine instead");
+                    return createDefaultEngine();
+                }
+            }
+
+            window.engine = await asyncEngineCreation();
+            if (!engine) throw 'engine should not be null.';
+            window.scene = createScene();
+        };
+        initFunction().then(() => {
+            sceneToRender = scene
+            engine.runRenderLoop(function () {
+                if (sceneToRender && sceneToRender.activeCamera) {
+                    sceneToRender.render();
+                }
+            });
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+
+</html>
